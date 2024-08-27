@@ -78,7 +78,7 @@ def find_extreme_in_blast(input_data, sampleSize=100, findMax=True, degree=3, it
                 sampleSize, input_array, results, bounds, seed=seed, needValData=needValData)
             
         print("samplesize", len(sampled_values))
-        low_bound_size = sampleSize
+        low_bound_size = min(sampleSize, 1000)
         if len(sampled_values) < low_bound_size:
             print("not enough sample size ", len(sampled_values))
             break
@@ -154,14 +154,14 @@ def findMap2():
     origin_data = np.loadtxt('data/minimum_detail.txt')
     input_data = getElevationsMap(origin_data)
     result = find_extreme_in_blast(input_data, findMax=False, sampleSize=5000,
-                          degree=28, iteration=20, guess_size=100, method='COBYLA', shrink_factor=1.1, needPlotMap=True,epsilon=0.001)
+                          degree=28, iteration=50, guess_size=100, method='COBYLA', shrink_factor=1.1, needPlotMap=True,epsilon=0.001)
     print(result)
 
 def findMap3():
     origin_data = np.loadtxt('data/palouse_detail5120.txt')
     input_data = getElevationsMap(origin_data)
     find_extreme_in_blast(input_data, findMax=True, sampleSize=50000, degree=9,
-                          iteration=30,  guess_size=100, method='COBYLA', shrink_factor=1.1,epsilon=0.0002,error_mode=1)
+                          iteration=50,  guess_size=100, method='COBYLA', shrink_factor=1.1,epsilon=0.0002,error_mode=1)
 
 
 def findBlastMap3D():

@@ -117,7 +117,6 @@ def find_extreme_use_cluster(input_data,block_nums, sampleSize=100, findMax=True
             input_array, data, bounds_array, sampleSize, findMax=findMax,need_generate_data = generate_new_data,fileName=fileName,dimesion_info=dimesion_info,precisions = precisions)
         print("real_sample_size:",real_sample_size)
         if real_sample_size <= 0:
-        # if real_sample_size < sampleSize:
             print("not enough samplesize")
             break
         time_array.append(time.time()-begin_time)
