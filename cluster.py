@@ -184,13 +184,9 @@ def plotMap3():
                                     iteration=50,  generate_new_data=False,  shrink_factor=1.2,needPlotMap = True,error_mode=1,epsilon=0.0002)
     print(result)
     return result
-def findBlastMap2D():
-   
-    
+def findBlastMap2D(): 
     block_nums = [2,2]
-    input_data = getBlastMap()
-
-    
+    input_data = getBlastMap()   
     result = find_extreme_use_cluster(input_data, block_nums,findMax=False, sampleSize=16, 
                                     iteration=30,  generate_new_data=True,  shrink_factor=2,needPlotMap= True)
     print(result)
@@ -240,6 +236,7 @@ def main():
 
 
 def real_run():
+    unzip()
     # The following five methods can all be run. 
     # Uncomment the desired method to execute it.
     

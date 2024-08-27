@@ -88,8 +88,13 @@ def convert_points_2_inputparams(samplePoints, dimensionInfo):
     constants_map = dimensionInfo.constants_map
 
     all_variable_names = variables_name + list(constants_map.keys())
-
-    with open('/Users/han/地图/input_file.csv', mode='w', newline='') as file:
+    
+    file_path = '/Users/han/mymap/input_file.csv'
+    folder_path = os.path.dirname(file_path)
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        
+    with open(file_path, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(all_variable_names)
 
@@ -112,7 +117,7 @@ def reorder_columns(file_path, output_path,dimension_info):
 
     
 def divideData1():
-    input_file = '/Users/han/地图/input_file.csv'
+    input_file = '/Users/han/mymap/input_file.csv'
     data = pd.read_csv(input_file)
 
     num_rows = len(data)
@@ -127,7 +132,7 @@ def divideData1():
 
         subset = data.iloc[start_row:end_row]
 
-        output_file = f'/Users/han/地图/input_file3_{i + 1}.csv'
+        output_file = f'/Users/han/mymap/input_file3_{i + 1}.csv'
 
         subset.to_csv(output_file, index=False)
 def log_transform_columns(input_file_path, output_file_path, dimension_info):
@@ -465,12 +470,12 @@ def generate_samples(saveFileName, sampleSize, bounds, dimension_info, precision
         sampleSize = int(sampleSize / train_ratio) + 5   
     points = generateRandomPoints(sampleSize, bounds, precisions, mode,outer_sample_factor)
     convert_points_2_inputparams(points, dimension_info)
-    input_file_name= '/Users/han/地图/input_file.csv'
+    input_file_name= '/Users/han/mymap/input_file.csv'
     reorder_columns(input_file_name,input_file_name,dimension_info)
     multiply_columns_by_factors(input_file_name,input_file_name,dimension_info)
     divideData1()
     simulation_generate_results(saveFileName)
-    file_path_pattern = '/Users/han/地图/blast_results_from_file3_{}.csv'  
+    file_path_pattern = '/Users/han/mymap/blast_results_from_file3_{}.csv'  
     combineData1(file_path_pattern,saveFileName)
     multiply_columns_by_factors(saveFileName,saveFileName,dimension_info,recover=False)
     log_transform_columns(saveFileName,saveFileName,dimension_info)
@@ -494,12 +499,12 @@ def generate_samples_all(saveFileName, all_bounds, sampleSize, dimension_info, p
     print("bound_indices:", bound_indices)
     all_points = np.vstack(all_points)  
     convert_points_2_inputparams(all_points, dimension_info)
-    input_file_name= '/Users/han/地图/input_file.csv'
+    input_file_name= '/Users/han/mymap/input_file.csv'
     reorder_columns(input_file_name,input_file_name,dimension_info)
     multiply_columns_by_factors(input_file_name,input_file_name,dimension_info)
     divideData1()
     simulation_generate_results(saveFileName)
-    file_path_pattern = '/Users/han/地图/blast_results_from_file3_{}.csv'  
+    file_path_pattern = '/Users/han/mymap/blast_results_from_file3_{}.csv'  
     combineData1(file_path_pattern,saveFileName)
     multiply_columns_by_factors(saveFileName,saveFileName,dimension_info,recover=False)
     log_transform_columns(saveFileName,saveFileName,dimension_info)
