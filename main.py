@@ -144,21 +144,21 @@ def find_extreme_in_blast(input_data, sampleSize=100, findMax=True, degree=3, it
 
 
 def findMap1():
-    origin_data = np.loadtxt('taranaki_detail5120.txt')
+    origin_data = np.loadtxt('data/taranaki_detail5120.txt')
     input_data = getElevationsMap(origin_data)
     result = find_extreme_in_blast(input_data, findMax=True,
                           sampleSize=500, degree=3, iteration=15, guess_size=10,shrink_factor=2)
     print(result)
 
 def findMap2():
-    origin_data = np.loadtxt('minimum_detail.txt')
+    origin_data = np.loadtxt('data/minimum_detail.txt')
     input_data = getElevationsMap(origin_data)
     result = find_extreme_in_blast(input_data, findMax=False, sampleSize=5000,
                           degree=28, iteration=20, guess_size=100, method='COBYLA', shrink_factor=1.1, needPlotMap=True,epsilon=0.001)
     print(result)
 
 def findMap3():
-    origin_data = np.loadtxt('palouse_detail5120.txt')
+    origin_data = np.loadtxt('data/palouse_detail5120.txt')
     input_data = getElevationsMap(origin_data)
     find_extreme_in_blast(input_data, findMax=True, sampleSize=50000, degree=9,
                           iteration=30,  guess_size=100, method='COBYLA', shrink_factor=1.1,epsilon=0.0002,error_mode=1)
@@ -179,9 +179,10 @@ def findBlastMap2D():
 scrollable_frame = None
 
 blast_fileName2 = "blast_furnace_results2.csv"
-
+ 
 
 def real_run():
+    unzip()
     # The following five methods can all be run. 
     # Uncomment the desired method to execute it.
     

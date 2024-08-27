@@ -24,6 +24,7 @@ from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 import csv
 from regression import *
+import zipfile
 
 
 savePlot = True
@@ -889,3 +890,11 @@ def extract_outer_layer(array, mode='None'):
         outer_elements = array[tuple(outer_indices.T)]
 
     return outer_elements
+
+def unzip():
+    if not os.path.exists('data/taranaki_detail5120.txt'):
+        with zipfile.ZipFile('data.zip', 'r') as zip_ref:
+            zip_ref.extractall()  
+        print("unzip")
+    else:
+        print("files exist")

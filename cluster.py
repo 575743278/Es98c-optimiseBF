@@ -160,7 +160,7 @@ def returnPointInBlock(best_block_bounds, data, precisions):
 
 
 def plotMap1():
-    origin_data = np.loadtxt('taranaki_detail5120.txt')
+    origin_data = np.loadtxt('data/taranaki_detail5120.txt')
     input_data = getElevationsMap(origin_data)
     block_nums = [2,2]
     result = find_extreme_use_cluster(input_data, block_nums,findMax=True, sampleSize=100,
@@ -168,7 +168,7 @@ def plotMap1():
     print(result)
     return result
 def plotMap2():
-    origin_data = np.loadtxt('minimum_detail5120.txt')
+    origin_data = np.loadtxt('data/minimum_detail5120.txt')
     input_data = getElevationsMap(origin_data)
     block_nums = [23,23]
     result = find_extreme_use_cluster(input_data,  block_nums,findMax=False, sampleSize=100, 
@@ -177,7 +177,7 @@ def plotMap2():
     return result
 
 def plotMap3():
-    origin_data = np.loadtxt('palouse_detail5120.txt')
+    origin_data = np.loadtxt('data/palouse_detail5120.txt')
     input_data = getElevationsMap(origin_data)
     block_nums = [10,10]
     result = find_extreme_use_cluster(input_data, block_nums,findMax=True, sampleSize=100, 
