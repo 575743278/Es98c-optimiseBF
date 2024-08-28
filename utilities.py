@@ -461,6 +461,15 @@ def boundary_sampling(bounds, total_boundary_points):
     return samples
 
 
+'''
+For PRMCO.
+1. Sample input parameter combinations within the search range.
+2. Combine these with other fixed input parameters to format for BF model acceptance.
+3. Restore the original scale if the search range has been scaled.
+4. Split the parameter set into multiple files for parallel processing by the blast furnace model.
+5. Merge the generated samples.
+6. Apply a logarithmic transformation.
+'''
 
 def generate_samples(saveFileName, sampleSize, bounds, dimension_info, precisions, mode=1,outer_sample_factor = 0.2, train_ratio=0.8, needValData=False):  
     originSampleSize = sampleSize
@@ -488,6 +497,18 @@ def generate_samples(saveFileName, sampleSize, bounds, dimension_info, precision
     print("seperateTrainVal",seperateTrainVal)
     return seperateTrainVal(existed_points, existed_values,train_ratio,originSampleSize)
 
+
+'''
+For CMCO.
+This method combines the samples from all clusters in one iteration for a single simulation, 
+and then the results are divided and returned to each respective cluster to save time.
+1. Sample input parameter combinations within the search range.
+2. Combine these with other fixed input parameters to format for BF model acceptance.
+3. Restore the original scale if the search range has been scaled.
+4. Split the parameter set into multiple files for parallel processing by the blast furnace model.
+5. Merge the generated samples.
+6. Apply a logarithmic transformation.
+'''
 def generate_samples_all(saveFileName, all_bounds, sampleSize, dimension_info, precisions, mode=1):
     all_points = []
     bound_indices = []  
@@ -508,12 +529,10 @@ def generate_samples_all(saveFileName, all_bounds, sampleSize, dimension_info, p
     combineData1(file_path_pattern,saveFileName)
     multiply_columns_by_factors(saveFileName,saveFileName,dimension_info,recover=False)
     log_transform_columns(saveFileName,saveFileName,dimension_info)
-    # backup_data(saveFileName, 'back_up.csv')
 
     existed_points, existed_values = extract_points_from_csv(
         saveFileName, dimension_info)
 
-    # 根据 bound_indices 将 existed_points 和 existed_values 拆分
     split_points = []
     split_values = []
 
@@ -579,15 +598,7 @@ def getMultiplyFactor(variables_name, factors):
 
     
 def getBoundsMultiplied(bounds, factor_array, precision_array):
-    """
-    Multiplies each bound in bounds by the corresponding factor in factor_array,
-    and rounds the result to the specified precision for each variable.
-    
-    :param bounds: List of tuples, where each tuple contains the (min, max) bounds for a variable.
-    :param factor_array: List of factors to multiply with the corresponding bounds.
-    :param precision_array: List of precisions to round the result for each variable.
-    :return: List of tuples with multiplied and rounded bounds.
-    """
+   
     multiplied_bounds = []
     
     for bound, factor, precision in zip(bounds, factor_array, precision_array):
@@ -599,15 +610,7 @@ def getBoundsMultiplied(bounds, factor_array, precision_array):
     
     return multiplied_bounds
 def recoverPredictPoint(predict_point, input_data):
-    """
-    Recovers the original scale of the predicted point by multiplying each coordinate 
-    by the corresponding factor in factor_array and rounding the result to the specified precision.
-
-    :param predict_point: List of predicted point coordinates.
-    :param factor_array: List of factors to multiply with each coordinate.
-    :param precision_array: List of precisions to round the result for each coordinate.
-    :return: List of recovered point coordinates.
-    """
+  
     factor_array = input_data.factor_array
     precision_array = input_data.precisions
     if factor_array is None :
@@ -642,6 +645,9 @@ def getBlastMap3D(fileName = None,isCluster = False):
     
     origin_bounds =[(1,9),(10,150),(2e-8,1.9e-7)]
     factor_array = None
+    # Due to precision issues with the built-in optimization algorithms in the range (2e-8, 1.9e-7),
+    # the range is scaled to (0.2, 1.9) for parameter search. The original magnitude is restored
+    # when passing the input parameters to the blast furnace model.
     if isCluster == False:
         info.factors = { "f1": [1e7,1e-7]}
         factor_array = getMultiplyFactor(variables_name, info.factors)
@@ -751,32 +757,26 @@ def normalize_point(point, bounds):
     return (np.array(point) - bounds[:, 0]) / (bounds[:, 1] - bounds[:, 0])
 
 def calculateDistanceError(predict_points, real_extreme_point, input_data,origin_bounds, mode=0):
-    # print("predict_points",predict_points)
-    # print("real_extreme_point",real_extreme_point)
     error_array = []
-    # error_array1 = []
+
 
     normalized_real_extreme_point = normalize_point(real_extreme_point, origin_bounds)
     normalized_predict_points = [normalize_point(point, origin_bounds) for point in predict_points]
-    # print("normalized_predict_points",normalized_predict_points)
-    # print("normalized_real_extreme_point",normalized_real_extreme_point)
+
     if mode == 0:
         for point in normalized_predict_points:
             
             error = np.linalg.norm(
                 np.array(point) - np.array(normalized_real_extreme_point))
             error_array.append(error)
-        # for point in predict_points:
-        #     error = np.linalg.norm(
-        #         np.array(point) - np.array(real_extreme_point))
-        #     error_array1.append(error)
+
     else:
        
         data = input_data.Z 
         real_extreme_value = getRealValueFromData(real_extreme_point, data)
-        # print("Real extreme point value:", real_extreme_value)
+
         for point in predict_points:
-            # print("predict_point:",point)
+
             pred_value = getRealValueFromData(point, data)
             print("real_value:",pred_value)
 
@@ -804,7 +804,6 @@ def lastNPointsConverged(epsilon, predict_points, origin_bounds, n=3):
     if len(predict_points) < n + 1:
         # Not enough points to compare
         return False
-
   
     min_bounds = [bound[0] for bound in origin_bounds]
     max_bounds = [bound[1] for bound in origin_bounds]
@@ -851,7 +850,7 @@ def calculate_metrics(model, poly, scaler, val_values, val_results):
     
    
     n = len(val_results)
-    k = val_poly_features.shape[1] - 1  # 特征数量减去常数项
+    k = val_poly_features.shape[1] - 1  
     adjusted_r2 = r2 - ((1 - r2) * k) / (n - (k + 1))
     return rmse, r2, mape, adjusted_r2
 
