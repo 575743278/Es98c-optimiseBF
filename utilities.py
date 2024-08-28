@@ -105,7 +105,7 @@ def convert_points_2_inputparams(samplePoints, dimensionInfo):
 
     print("CSV file 'input_file.csv' has been updated.")
     
-# reorder the input parameters to blast furnace model needed format
+# Reorder the input parameters to blast furnace model needed format
 def reorder_columns(file_path, output_path,dimension_info):
     
     df = pd.read_csv(file_path)
@@ -137,7 +137,7 @@ def divideData1():
         output_file = f'/Users/han/mymap/input_file3_{i + 1}.csv'
 
         subset.to_csv(output_file, index=False)
-# log transformation
+# Log transformation
 def log_transform_columns(input_file_path, output_file_path, dimension_info):
     df = pd.read_csv(input_file_path)
     
@@ -153,7 +153,7 @@ def log_transform_columns(input_file_path, output_file_path, dimension_info):
     
     print(f'Modified file saved to {output_file_path}')    
     
-# scale or restore the original scale if the search range has been scaled.
+# Scale or restore the original scale if the search range has been scaled.
 def multiply_columns_by_factors(input_file_path, output_file_path, dimensionInfo,recover = True):
     df = pd.read_csv(input_file_path)
     
@@ -191,7 +191,7 @@ def combineData1(file_path_pattern,output_file_path):
 
     print(f'Combined file saved to {output_file_path}')
     
-# extract samples from files to array
+# Extract samples from files to array
 def extract_points_from_csv(csv_filename, dimensionInfo):
     variables_name = dimensionInfo.variables_name
 
@@ -295,7 +295,7 @@ def plotMap3D(frame, data, coordinates, predictPoints=None, readExtreme=None, be
     canvas.draw()
 
 
-# get samples from existed dataset (Map datasets)
+# Get samples from existed dataset (Map datasets)
 def getSamples(sampleSize, input_array, results, bounds, seed=None, train_ratio=0.8, needValData=False,outer_sample_factor = 0.2,pure_no_border = False):
     np.random.seed(seed)
     num_outer_samples =int(outer_sample_factor*sampleSize) 
@@ -591,7 +591,7 @@ def getBoundsMultiplied(bounds, factor_array, precision_array):
     
     return multiplied_bounds
 
-# predicted input parameter has been scaled,need to rescale
+# Predicted input parameter has been scaled,need to rescale
 def recoverPredictPoint(predict_point, input_data):
   
     factor_array = input_data.factor_array
@@ -660,7 +660,7 @@ def findRealExtreme(input_array, results, findMax=True):
 
     return extreme_point, extreme_value
 
-# contract the search space
+# Contract the search space
 def shrinkBound(origin_bounds, new_sizes, center_point, precisions=None):
     num_dimensions = len(origin_bounds)
     assert num_dimensions == len(new_sizes) == len(
@@ -689,7 +689,7 @@ def shrinkBound(origin_bounds, new_sizes, center_point, precisions=None):
     
     return new_bounds
 
-# calculate the reduced search space size 
+# Calculate the length of each dimension of the reduced search space  
 def getNewWH(origin_bounds, iteration, precisions=0, shrink_factor=2):
     iteration = iteration + 1
     divide = shrink_factor ** iteration
@@ -780,7 +780,7 @@ def getRealValueFromData(point, data):
     return real_value
 
 
-# convergence determination
+# Convergence determination
 def lastNPointsConverged(epsilon, predict_points, origin_bounds, n=3):
     if len(predict_points) < n + 1:
         # Not enough points to compare
@@ -876,7 +876,7 @@ def extract_outer_layer(array, mode='None'):
 
     return outer_elements
 
-# unzip data folder
+# Unzip data folder
 def unzip():
     if not os.path.exists('data/taranaki_detail5120.txt'):
         with zipfile.ZipFile('data.zip', 'r') as zip_ref:
