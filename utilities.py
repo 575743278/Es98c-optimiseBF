@@ -82,7 +82,7 @@ class MapInput:
 variables_list = ['CokeOreRatio', 'HotBlastRate',
                   'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7']
 
-
+# Combine generated input parameters with other fixed input parameters to format for BF model acceptance.
 def convert_points_2_inputparams(samplePoints, dimensionInfo):
     variables_name = dimensionInfo.variables_name
     constants_map = dimensionInfo.constants_map
@@ -104,6 +104,8 @@ def convert_points_2_inputparams(samplePoints, dimensionInfo):
             writer.writerow(input_params)
 
     print("CSV file 'input_file.csv' has been updated.")
+    
+# reorder the input parameters to blast furnace model needed format
 def reorder_columns(file_path, output_path,dimension_info):
     
     df = pd.read_csv(file_path)
@@ -115,7 +117,7 @@ def reorder_columns(file_path, output_path,dimension_info):
     df.to_csv(output_path, index=False)
 
 
-    
+# Split the parameter set into multiple files for parallel processing by the blast furnace model.
 def divideData1():
     input_file = '/Users/han/mymap/input_file.csv'
     data = pd.read_csv(input_file)
@@ -135,14 +137,8 @@ def divideData1():
         output_file = f'/Users/han/mymap/input_file3_{i + 1}.csv'
 
         subset.to_csv(output_file, index=False)
+# log transformation
 def log_transform_columns(input_file_path, output_file_path, dimension_info):
-    """
-    Applies the np.log1p transformation to the specified columns in need_log_column and saves the result to a new file.
-    
-    :param input_file_path: Path to the input CSV file.
-    :param output_file_path: Path to save the modified CSV file.
-    :param dimension_info: An instance of DimensionInfo containing the need_log_column list.
-    """
     df = pd.read_csv(input_file_path)
     
     need_log_columns = dimension_info.need_log_column
@@ -156,14 +152,9 @@ def log_transform_columns(input_file_path, output_file_path, dimension_info):
     df.to_csv(output_file_path, index=False)
     
     print(f'Modified file saved to {output_file_path}')    
-def multiply_columns_by_factors(input_file_path, output_file_path, dimensionInfo,recover = True):
-    """
-    Multiplies the values in specified columns by their corresponding factors and saves the result to a new file.
     
-    :param input_file_path: Path to the input CSV file.
-    :param output_file_path: Path to save the modified CSV file.
-    :param dimensionInfo: An instance of DimensionInfo containing the factors to apply.
-    """
+# scale or restore the original scale if the search range has been scaled.
+def multiply_columns_by_factors(input_file_path, output_file_path, dimensionInfo,recover = True):
     df = pd.read_csv(input_file_path)
     
     factors = dimensionInfo.factors
@@ -182,6 +173,7 @@ def multiply_columns_by_factors(input_file_path, output_file_path, dimensionInfo
     
     print(f'Modified file saved to {output_file_path}')
       
+# Merge the generated samples.
 def combineData1(file_path_pattern,output_file_path):
     combined_df = pd.DataFrame()
 
@@ -198,7 +190,8 @@ def combineData1(file_path_pattern,output_file_path):
     combined_df.to_csv(output_file_path, index=False)
 
     print(f'Combined file saved to {output_file_path}')
-
+    
+# extract samples from files to array
 def extract_points_from_csv(csv_filename, dimensionInfo):
     variables_name = dimensionInfo.variables_name
 
@@ -215,7 +208,7 @@ def extract_points_from_csv(csv_filename, dimensionInfo):
 
     return np.array(points), np.array(ratios)
 
-
+# Visualization 
 def plotMap(frame, data, coordinates, predictPoints=None, readExtreme=None, bestPredictPoints=None, bounds=None, divisions=None, title='',mapInput =  MapInput('','','',''),origin_bounds = None):
     if len(origin_bounds) == 2:
         plotMap2D(frame, data, coordinates, predictPoints, readExtreme,
@@ -225,6 +218,7 @@ def plotMap(frame, data, coordinates, predictPoints=None, readExtreme=None, best
                   bestPredictPoints, bounds,  title,mapInput)
 
 number = 1
+# Visualization in 2D
 def plotMap2D(frame, data, coordinates, predictPoints=None, readExtreme=None, bestPredictPoints=None, bounds=None, divisions=None, title='',mapInput = None):
     fig, ax = plt.subplots(figsize=(5, 3))
     ax.set_xlabel(mapInput.x_lable)
@@ -265,7 +259,7 @@ def plotMap2D(frame, data, coordinates, predictPoints=None, readExtreme=None, be
     # plt.close(fig)
 
 
-
+# Visualization in 3D
 def plotMap3D(frame, data, coordinates, predictPoints=None, readExtreme=None, bestPredictPoints=None, bounds=None, title='',mapInput = None):
     fig = plt.figure(figsize=(6, 4))
     ax = fig.add_subplot(111, projection='3d')
@@ -301,6 +295,7 @@ def plotMap3D(frame, data, coordinates, predictPoints=None, readExtreme=None, be
     canvas.draw()
 
 
+# get samples from existed dataset (Map datasets)
 def getSamples(sampleSize, input_array, results, bounds, seed=None, train_ratio=0.8, needValData=False,outer_sample_factor = 0.2,pure_no_border = False):
     np.random.seed(seed)
     num_outer_samples =int(outer_sample_factor*sampleSize) 
@@ -381,7 +376,7 @@ def getSamples(sampleSize, input_array, results, bounds, seed=None, train_ratio=
     
 
     
-
+# Seperate train and validate data
 def seperateTrainVal(values_with_border,results_with_border,train_ratio,originSampleSize):
   
     total_samples = len(values_with_border)
@@ -401,7 +396,7 @@ def seperateTrainVal(values_with_border,results_with_border,train_ratio,originSa
     val_results = results_with_border[val_indices]
     return train_values, train_results, val_values, val_results
 
-
+# Sample input parameter combinations within the search range.
 def generateRandomPoints(sampleSize, bounds,  precisions=None, mode=1, outer_sample_factor = 0.01):
     num_dimensions = len(bounds)
     
@@ -432,6 +427,7 @@ def generateRandomPoints(sampleSize, bounds,  precisions=None, mode=1, outer_sam
         samples = np.vstack([samples, boundary_samples])
     return samples
 
+# Generate input parameter samples on boundaries
 def boundary_sampling(bounds, total_boundary_points):
 
     num_dimensions = len(bounds)
@@ -545,19 +541,10 @@ def generate_samples_all(saveFileName, all_bounds, sampleSize, dimension_info, p
     print("bounds_array", all_bounds)
     return split_points, split_values
 
-
+#2D Map dataset information
 def getBlastMap(plotContour = False):
     input_array = None
     Z = None
-    if plotContour:
-        data = pd.read_csv('./bf_data/blast_2d_fixf1_multif1.csv')
-     
-        pivot_table = data.pivot_table(
-            index='CokeOreRatio', columns='HotBlastRate', values='CO2_Fe_Ratio')
-        Z = pivot_table.values
-        input_array = []
-        input_array.append(np.array(pivot_table.index))
-        input_array.append(np.array(pivot_table.columns))
     precisions = [10, 10]
     
     blast_fileName_MD = "bf_MD.csv"
@@ -577,13 +564,7 @@ def getBlastMap(plotContour = False):
 
 
 def getMultiplyFactor(variables_name, factors):
-    """
-    Returns an array of factors corresponding to the variables in variables_name.
-    
-    :param variables_name: List of variable names.
-    :param factors: Dictionary mapping variable names to their respective factors.
-    :return: List of factors corresponding to the variables in variables_name.
-    """
+
     factor_array = []
     
     for variable in variables_name:
@@ -596,7 +577,7 @@ def getMultiplyFactor(variables_name, factors):
     return factor_array
 
 
-    
+# Scale search space    
 def getBoundsMultiplied(bounds, factor_array, precision_array):
    
     multiplied_bounds = []
@@ -609,6 +590,8 @@ def getBoundsMultiplied(bounds, factor_array, precision_array):
         multiplied_bounds.append(new_bound)
     
     return multiplied_bounds
+
+# predicted input parameter has been scaled,need to rescale
 def recoverPredictPoint(predict_point, input_data):
   
     factor_array = input_data.factor_array
@@ -616,17 +599,14 @@ def recoverPredictPoint(predict_point, input_data):
     if factor_array is None :
         return predict_point
     recovered_point = []
-    # print("predict_point,",predict_point)
     for point, factor, precision in zip(predict_point, factor_array, precision_array):
-        # print("predict_point,",predict_point)
-        # print(point)
         recovered_value = round(point * factor[1], precision)
         recovered_point.append(recovered_value)
     
     return recovered_point
 
 
-
+# 3D visulization
 def getBlastMap3D(fileName = None,isCluster = False):
     input_array = None
     Z = None
@@ -655,7 +635,7 @@ def getBlastMap3D(fileName = None,isCluster = False):
     return InputData(input_array, Z, precisions,blast_fileName_MD,info,origin_bounds=origin_bounds,real_extreme_point=(9,150,1.9e-7),factor_array=factor_array)
     
 
-
+# Find the true optimum in map datasets as benchmark
 def findRealExtreme(input_array, results, findMax=True):
   
     if findMax:
@@ -726,7 +706,7 @@ def getNewWH(origin_bounds, iteration, precisions=0, shrink_factor=2):
     return new_dimensions
 
 
-
+# Find the optimal solution by identifying the extremum obtained from multiple parameter optimization tests.
 def findExtremeInArray(extreme_points, extreme_values, findMax=False):
     index = 0
     if findMax:
@@ -736,7 +716,7 @@ def findExtremeInArray(extreme_points, extreme_values, findMax=False):
     extreme_point = extreme_points[index]
     return extreme_point
 
-
+# For plot contour
 def getElevationsMap(origin_data, bounds=None):
     lats = np.arange(origin_data.shape[0])
     lons = np.arange(origin_data.shape[1])
@@ -750,12 +730,13 @@ def getElevationsMap(origin_data, bounds=None):
     return InputData(input_array, origin_data, precisions,origin_bounds=origin_bounds)
 
 
-   
+# Normalize predicted input parameters to calculate the relative parameter error not the absolute error
 def normalize_point(point, bounds):
    
     bounds = np.array(bounds)
     return (np.array(point) - bounds[:, 0]) / (bounds[:, 1] - bounds[:, 0])
 
+# Calculate the parameter error
 def calculateDistanceError(predict_points, real_extreme_point, input_data,origin_bounds, mode=0):
     error_array = []
 
@@ -790,7 +771,7 @@ def calculateDistanceError(predict_points, real_extreme_point, input_data,origin
   
     return error_array
 
-
+# Get real elevation from map dataset
 def getRealValueFromData(point, data):
     real_value = data
     for index in point:
@@ -828,7 +809,7 @@ def lastNPointsConverged(epsilon, predict_points, origin_bounds, n=3):
 
 
 
-
+# Calculate metrics
 def calculate_metrics(model, poly, scaler, val_values, val_results):
  
     val_values_scaled = scaler.transform(val_values)
@@ -855,7 +836,7 @@ def calculate_metrics(model, poly, scaler, val_values, val_results):
     return rmse, r2, mape, adjusted_r2
 
 
-
+# Extract samples on boundries in map datasets
 def extract_outer_layer(array, mode='None'):
     
     shape = array.shape
@@ -895,6 +876,7 @@ def extract_outer_layer(array, mode='None'):
 
     return outer_elements
 
+# unzip data folder
 def unzip():
     if not os.path.exists('data/taranaki_detail5120.txt'):
         with zipfile.ZipFile('data.zip', 'r') as zip_ref:

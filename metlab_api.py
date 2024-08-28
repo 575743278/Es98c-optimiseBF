@@ -1,5 +1,5 @@
 import matlab.engine
-
+# run blast furnace simulation
 def simulation_generate_results(output_filename):
   
     eng = matlab.engine.start_matlab()
