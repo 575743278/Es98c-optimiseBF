@@ -743,7 +743,7 @@ def calculateDistanceError(predict_points, real_extreme_point, input_data,origin
 
     normalized_real_extreme_point = normalize_point(real_extreme_point, origin_bounds)
     normalized_predict_points = [normalize_point(point, origin_bounds) for point in predict_points]
-
+    # distance error
     if mode == 0:
         for point in normalized_predict_points:
             
@@ -752,7 +752,7 @@ def calculateDistanceError(predict_points, real_extreme_point, input_data,origin
             error_array.append(error)
 
     else:
-       
+        # result error 
         data = input_data.Z 
         real_extreme_value = getRealValueFromData(real_extreme_point, data)
 
