@@ -910,7 +910,9 @@ def generate_pairwise_inputs(variables_name, origin_bounds, precisions, constant
 
         factor_array = None
         if not isCluster:
-            
+            # Due to precision issues with the built-in optimization algorithms in the range of f1 (2e-8, 1.9e-7),
+            # the range is scaled to (0.2, 1.9) for parameter search. The original magnitude is restored
+            # when passing the input parameters to the blast furnace model.
             if pair_factors:  
                 pair_info.factors = pair_factors
                 factor_array = getMultiplyFactor(pair_variables_name, pair_factors)
