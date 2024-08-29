@@ -906,13 +906,15 @@ def generate_pairwise_inputs(variables_name, origin_bounds, precisions, constant
             if var not in pair_variables_name:
                 pair_constants_map[var] = constants_map.get(var, default_value.get(var, 0.0))
         
-        pair_info = DimensionInfo(pair_variables_name, pair_constants_map,factors)
+        pair_info = DimensionInfo(pair_variables_name, pair_constants_map)
 
         factor_array = None
         if not isCluster:
+            pair_info.factors = factors
             if pair_factors:  
                 factor_array = getMultiplyFactor(pair_variables_name, pair_factors)
                 pair_bounds = getBoundsMultiplied(pair_bounds, factor_array, pair_precisions)
+                
         else:
             pair_factors = {}  
 
@@ -921,10 +923,21 @@ def generate_pairwise_inputs(variables_name, origin_bounds, precisions, constant
                                origin_bounds=np.array(pair_bounds),
                                real_extreme_point=np.array([pair_bounds[0][1], pair_bounds[1][1]]),
                                factor_array=factor_array)
-        print(pair_factors)
         pairwise_inputs.append(input_data)
     
     return pairwise_inputs
+
+def apply_factors_to_default_values(default_value, factors):
+    scaled_default_value = {}
+    
+    for key, value in default_value.items():
+        if key in factors:
+            scaled_value = value * factors[key][0] 
+        else:
+            scaled_value = value  
+        scaled_default_value[key] = scaled_value
+    
+    return scaled_default_value
 
 def generate_pairwise_inputs_3D(isCluster = False):
    
@@ -937,9 +950,9 @@ def generate_pairwise_inputs_3D(isCluster = False):
         "f2": 0.0000001, "f3": 0.0000001, "f4": 0.0000001,
         "f5": 0.0000001, "f6": 0.0000001, "f7": 0.0000001
     }
-    default_value = {"CokeOreRatio": 1, "HotBlastRate": 10, "f1": 1}
-
-    pairwise_inputs = generate_pairwise_inputs(variables_name, origin_bounds, precisions, constants_map, factors,default_value,isCluster)
+    default_value = {"CokeOreRatio": 1, "HotBlastRate": 10, "f1": 0.0000001}
+    scaled_default_value = apply_factors_to_default_values(default_value,factors)
+    pairwise_inputs = generate_pairwise_inputs(variables_name, origin_bounds, precisions, constants_map, factors,scaled_default_value,isCluster)
 
     
     return pairwise_inputs
@@ -975,8 +988,8 @@ def getCombinedResult(curentMapInfo, predict_point):
     return combined_result
 
 
-# result = generate_pairwise_inputs_3D()
-# print(result[1])
+result = generate_pairwise_inputs_3D()
+print(result[0])
 # setOptimisedConstant(result[0],result[1],(9,150))
 # print(result[1])
 # combined_result = getCombinedResult(result[0],(9,150))
