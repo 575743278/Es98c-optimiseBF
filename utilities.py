@@ -910,8 +910,9 @@ def generate_pairwise_inputs(variables_name, origin_bounds, precisions, constant
 
         factor_array = None
         if not isCluster:
-            pair_info.factors = factors
+            
             if pair_factors:  
+                pair_info.factors = pair_factors
                 factor_array = getMultiplyFactor(pair_variables_name, pair_factors)
                 pair_bounds = getBoundsMultiplied(pair_bounds, factor_array, pair_precisions)
                 
@@ -952,11 +953,7 @@ def generate_pairwise_inputs_3D(isCluster = False):
         "f5": 0.0000001, "f6": 0.0000001, "f7": 0.0000001
     }
     default_value = {"CokeOreRatio": 1, "HotBlastRate": 10, "f1": 0.0000001}
-    if isCluster:
-        scaled_default_value = default_value
-    else:
-        scaled_default_value = apply_factors_to_default_values(default_value,factors)
-    pairwise_inputs = generate_pairwise_inputs(variables_name, origin_bounds, precisions, constants_map, factors,scaled_default_value,isCluster)
+    pairwise_inputs = generate_pairwise_inputs(variables_name, origin_bounds, precisions, constants_map, factors,default_value,isCluster)
 
     
     return pairwise_inputs
