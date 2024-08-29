@@ -232,6 +232,20 @@ def main():
 
     root.mainloop()
 
+# Find optimum in 3D blast furnace dataset using pairwise method
+def findUsingPairwise():
+    pairwise_inputs = generate_pairwise_inputs_3D(isCluster=True)
+    predict_points = []
+    block_nums =[2,2]
+    for index , input_data in enumerate(pairwise_inputs):
+        if index != 0:
+            input_old = pairwise_inputs[index-1]
+            setOptimisedConstant(input_old,input_data,predict_points[-1])
+        result = find_extreme_use_cluster(input_data, block_nums,findMax=False, sampleSize=1, 
+                                    iteration=1,  generate_new_data=True,  shrink_factor=2,needPlotMap= True)
+        predict_points = result.predict_points
+
+    print("combined", getCombinedResult(pairwise_inputs[-1],predict_points[-1]))
 
 
 def real_run():

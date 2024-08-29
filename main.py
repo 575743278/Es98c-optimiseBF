@@ -176,6 +176,7 @@ def findBlastMap2D():
                           iteration=20,  guess_size=100, method='COBYLA', shrink_factor=1.1, needPlotMap=True,epsilon=0.003)
     print(result)
     
+# Find optimum in 3D blast furnace dataset using pairwise method    
 def findUsingPairwise():
     pairwise_inputs = generate_pairwise_inputs_3D()
     predict_points = []

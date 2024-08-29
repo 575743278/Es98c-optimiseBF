@@ -888,7 +888,7 @@ def unzip():
         
         
 
-
+# Split full-dimensional information to 2D pairwise information array
 def generate_pairwise_inputs(variables_name, origin_bounds, precisions, constants_map, factors, default_value,isCluster=False):
     pairwise_inputs = []
     
@@ -951,7 +951,10 @@ def generate_pairwise_inputs_3D(isCluster = False):
         "f5": 0.0000001, "f6": 0.0000001, "f7": 0.0000001
     }
     default_value = {"CokeOreRatio": 1, "HotBlastRate": 10, "f1": 0.0000001}
-    scaled_default_value = apply_factors_to_default_values(default_value,factors)
+    if isCluster:
+        scaled_default_value = default_value
+    else:
+        scaled_default_value = apply_factors_to_default_values(default_value,factors)
     pairwise_inputs = generate_pairwise_inputs(variables_name, origin_bounds, precisions, constants_map, factors,scaled_default_value,isCluster)
 
     
@@ -970,8 +973,7 @@ def setOptimisedConstant(lastMapInfo, curentMapInfo, predict_points):
 
 
     curentMapInfo.dimesion_info.constants_map = current_constants_map
-    print("curentMapInfo")
-    print(curentMapInfo)
+
 
 def getCombinedResult(curentMapInfo, predict_point):
     variable_names = curentMapInfo.dimesion_info.variables_name
@@ -988,9 +990,3 @@ def getCombinedResult(curentMapInfo, predict_point):
     return combined_result
 
 
-result = generate_pairwise_inputs_3D()
-print(result[0])
-# setOptimisedConstant(result[0],result[1],(9,150))
-# print(result[1])
-# combined_result = getCombinedResult(result[0],(9,150))
-# print(len(combined_result))
