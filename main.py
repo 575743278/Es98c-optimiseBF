@@ -176,7 +176,10 @@ def findBlastMap2D():
                           iteration=20,  guess_size=100, method='COBYLA', shrink_factor=1.1, needPlotMap=True,epsilon=0.003)
     print(result)
     
-# Find optimum in 3D blast furnace dataset using pairwise method    
+# Find optimum in 3D blast furnace dataset using pairwise method  
+# Convert 3D full dimensional information to pairwise 2D information list
+# Optimize iteratively
+# combine result  
 def findUsingPairwise():
     pairwise_inputs = generate_pairwise_inputs_3D()
     predict_points = []
@@ -184,8 +187,8 @@ def findUsingPairwise():
         if index != 0:
             input_old = pairwise_inputs[index-1]
             setOptimisedConstant(input_old,input_data,predict_points[-1])
-        result = find_extreme_in_blast(input_data, findMax=False, sampleSize=4, degree=1, generate_new_data=True,
-                          iteration=1,  guess_size=100, method='COBYLA', shrink_factor=1.1, needPlotMap=True,epsilon=0.003)
+        result = find_extreme_in_blast(input_data, findMax=False, sampleSize=210, degree=3, generate_new_data=True,
+                          iteration=20,  guess_size=100, method='COBYLA', shrink_factor=1.1, needPlotMap=False,epsilon=0.003)
         predict_points = result.predict_points
 
     print("combined", getCombinedResult(pairwise_inputs[-1],predict_points[-1]))

@@ -939,6 +939,7 @@ def apply_factors_to_default_values(default_value, factors):
     
     return scaled_default_value
 
+# Convert 3D full dimensional information to pairwise 2D information list
 def generate_pairwise_inputs_3D(isCluster = False):
    
     variables_name = ['CokeOreRatio', 'HotBlastRate', 'f1']
