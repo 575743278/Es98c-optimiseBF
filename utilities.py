@@ -25,7 +25,8 @@ import numpy as np
 import csv
 from regression import *
 import zipfile
-
+import itertools
+import numpy as np
 
 savePlot = True
 plot_dic = 'result_plot1'
@@ -884,3 +885,99 @@ def unzip():
         print("unzip")
     else:
         print("files exist")
+        
+        
+
+
+def generate_pairwise_inputs(variables_name, origin_bounds, precisions, constants_map, factors, default_value,isCluster=False):
+    pairwise_inputs = []
+    
+    pairs = list(itertools.combinations(enumerate(variables_name), 2))
+
+    for (idx1, var1), (idx2, var2) in pairs:
+        pair_bounds = [origin_bounds[idx1], origin_bounds[idx2]]
+        pair_variables_name = [var1, var2]
+        pair_precisions = [precisions[idx1], precisions[idx2]]
+        
+        pair_factors = {k: factors[k] for k in pair_variables_name if k in factors}
+        
+        pair_constants_map = constants_map.copy()
+        for var in variables_name:
+            if var not in pair_variables_name:
+                pair_constants_map[var] = constants_map.get(var, default_value.get(var, 0.0))
+        
+        pair_info = DimensionInfo(pair_variables_name, pair_constants_map,factors)
+
+        factor_array = None
+        if not isCluster:
+            if pair_factors:  
+                factor_array = getMultiplyFactor(pair_variables_name, pair_factors)
+                pair_bounds = getBoundsMultiplied(pair_bounds, factor_array, pair_precisions)
+        else:
+            pair_factors = {}  
+
+        input_data = InputData(input_array=None, Z=None, precisions=pair_precisions,
+                               fileName="bf_MD.csv", dimesion_info=pair_info,
+                               origin_bounds=np.array(pair_bounds),
+                               real_extreme_point=np.array([pair_bounds[0][1], pair_bounds[1][1]]),
+                               factor_array=factor_array)
+        print(pair_factors)
+        pairwise_inputs.append(input_data)
+    
+    return pairwise_inputs
+
+def generate_pairwise_inputs_3D(isCluster = False):
+   
+    variables_name = ['CokeOreRatio', 'HotBlastRate', 'f1']
+    origin_bounds = [(1, 9), (10, 150), (2e-8, 1.9e-7)]
+    precisions = [10, 10, 15]
+    factors = {"f1": [1e7, 1e-7]}
+
+    constants_map = {
+        "f2": 0.0000001, "f3": 0.0000001, "f4": 0.0000001,
+        "f5": 0.0000001, "f6": 0.0000001, "f7": 0.0000001
+    }
+    default_value = {"CokeOreRatio": 1, "HotBlastRate": 10, "f1": 1}
+
+    pairwise_inputs = generate_pairwise_inputs(variables_name, origin_bounds, precisions, constants_map, factors,default_value,isCluster)
+
+    
+    return pairwise_inputs
+
+def setOptimisedConstant(lastMapInfo, curentMapInfo, predict_points):
+ 
+    last_variables = lastMapInfo.dimesion_info.variables_name
+
+    
+    current_constants_map = curentMapInfo.dimesion_info.constants_map
+
+    for var, value in zip(last_variables, predict_points):
+        if var in current_constants_map:
+            current_constants_map[var] = value
+
+
+    curentMapInfo.dimesion_info.constants_map = current_constants_map
+    print("curentMapInfo")
+    print(curentMapInfo)
+
+def getCombinedResult(curentMapInfo, predict_point):
+    variable_names = curentMapInfo.dimesion_info.variables_name
+    
+    combined_result = {}
+    
+    for var, value in zip(variable_names, predict_point):
+        combined_result[var] = value
+    
+    constants_map = curentMapInfo.dimesion_info.constants_map
+    for var, value in constants_map.items():
+        combined_result[var] = value
+    print(combined_result)
+    return combined_result
+
+
+# result = generate_pairwise_inputs_3D()
+# print(result[1])
+# setOptimisedConstant(result[0],result[1],(9,150))
+# print(result[1])
+# combined_result = getCombinedResult(result[0],(9,150))
+# print(len(combined_result))
