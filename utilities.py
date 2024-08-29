@@ -138,6 +138,7 @@ def divideData1():
         output_file = f'/Users/han/mymap/input_file3_{i + 1}.csv'
 
         subset.to_csv(output_file, index=False)
+        
 # Log transformation
 def log_transform_columns(input_file_path, output_file_path, dimension_info):
     df = pd.read_csv(input_file_path)
@@ -174,7 +175,7 @@ def multiply_columns_by_factors(input_file_path, output_file_path, dimensionInfo
     
     print(f'Modified file saved to {output_file_path}')
       
-# Merge the generated samples.
+# Combine the generated samples.
 def combineData1(file_path_pattern,output_file_path):
     combined_df = pd.DataFrame()
 
@@ -256,8 +257,7 @@ def plotMap2D(frame, data, coordinates, predictPoints=None, readExtreme=None, be
     canvas.draw()
     global number
     number = number+1
-    # save_plot(fig,number)
-    # plt.close(fig)
+
 
 
 # Visualization in 3D
@@ -289,7 +289,7 @@ def plotMap3D(frame, data, coordinates, predictPoints=None, readExtreme=None, be
     ax.legend(loc='upper left')
     plt.tight_layout()
  
-    # save_plot(fig,title)
+ 
     canvas = FigureCanvasTkAgg(fig, master=frame)
     canvas_widget = canvas.get_tk_widget()
     canvas_widget.pack(fill=tk.BOTH, expand=True)
@@ -459,13 +459,13 @@ def boundary_sampling(bounds, total_boundary_points):
 
 
 '''
-For PRMCO.
+For PRMCO, generate samples for BF dataset
 1. Sample input parameter combinations within the search range.
 2. Combine these with other fixed input parameters to format for BF model acceptance.
 3. Restore the original scale if the search range has been scaled.
 4. Split the parameter set into multiple files for parallel processing by the blast furnace model.
 5. Merge the generated samples.
-6. Apply a logarithmic transformation.
+6. Apply a logarithmic transformation to the output of the BF simulation
 '''
 
 def generate_samples(saveFileName, sampleSize, bounds, dimension_info, precisions, mode=1,outer_sample_factor = 0.2, train_ratio=0.8, needValData=False):  
@@ -485,7 +485,7 @@ def generate_samples(saveFileName, sampleSize, bounds, dimension_info, precision
     combineData1(file_path_pattern,saveFileName)
     multiply_columns_by_factors(saveFileName,saveFileName,dimension_info,recover=False)
     log_transform_columns(saveFileName,saveFileName,dimension_info)
-    # backup_data(saveFileName, 'back_up.csv')
+
     existed_points, existed_values = extract_points_from_csv(
         saveFileName, dimension_info)
 
@@ -496,7 +496,7 @@ def generate_samples(saveFileName, sampleSize, bounds, dimension_info, precision
 
 
 '''
-For CMCO.
+For CMCO, generate samples for BF dataset
 This method combines the samples from all clusters in one iteration for a single simulation, 
 and then the results are divided and returned to each respective cluster to save time.
 1. Sample input parameter combinations within the search range.
@@ -542,7 +542,7 @@ def generate_samples_all(saveFileName, all_bounds, sampleSize, dimension_info, p
     print("bounds_array", all_bounds)
     return split_points, split_values
 
-#2D Map dataset information
+# 2D Map dataset information
 def getBlastMap(plotContour = False):
     input_array = None
     Z = None
@@ -592,7 +592,7 @@ def getBoundsMultiplied(bounds, factor_array, precision_array):
     
     return multiplied_bounds
 
-# Predicted input parameter has been scaled,need to rescale
+# Predicted input parameter has been scaled, need to rescale
 def recoverPredictPoint(predict_point, input_data):
   
     factor_array = input_data.factor_array
@@ -626,7 +626,7 @@ def getBlastMap3D(fileName = None,isCluster = False):
     
     origin_bounds =[(1,9),(10,150),(2e-8,1.9e-7)]
     factor_array = None
-    # Due to precision issues with the built-in optimization algorithms in the range (2e-8, 1.9e-7),
+    # Due to precision issues with the built-in optimization algorithms in the range (2e-8, 1.9e-7) of f1,
     # the range is scaled to (0.2, 1.9) for parameter search. The original magnitude is restored
     # when passing the input parameters to the blast furnace model.
     if isCluster == False:
@@ -930,17 +930,7 @@ def generate_pairwise_inputs(variables_name, origin_bounds, precisions, constant
     
     return pairwise_inputs
 
-def apply_factors_to_default_values(default_value, factors):
-    scaled_default_value = {}
-    
-    for key, value in default_value.items():
-        if key in factors:
-            scaled_value = value * factors[key][0] 
-        else:
-            scaled_value = value  
-        scaled_default_value[key] = scaled_value
-    
-    return scaled_default_value
+
 
 # Convert 3D full dimensional information to pairwise 2D information list
 def generate_pairwise_inputs_3D(isCluster = False):

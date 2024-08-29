@@ -44,7 +44,7 @@ def predict(sampled_values, sampled_results, the_degree=2, bounds=None, log_tran
 
     return model, poly, scaler
 
-
+# Object fucntion get from trained polynomial model
 def objective_function(inputs, model, poly, scaler, findMax=True):
   
     inputs_scaled = scaler.transform([inputs])
@@ -71,7 +71,7 @@ def findOptimumUsingCOBYLA(model, poly, scaler, bounds, findMax=True, random_gue
     min_bounds = [bound[0] for bound in bounds]
     max_bounds = [bound[1] for bound in bounds]
 
-    
+    # Init initial guess
     guesses = np.random.rand(random_guess, num_dimensions)
     for i in range(num_dimensions):
         guesses[:, i] = guesses[:, i] * \
@@ -82,7 +82,7 @@ def findOptimumUsingCOBYLA(model, poly, scaler, bounds, findMax=True, random_gue
 
     def opt_function(inputs):
         return objective_function(inputs, model, poly, scaler, findMax)
-
+    # Try several times to avoid trapped in local optimum
     for guess in guesses:
         try:
             result = minimize(opt_function, guess, bounds=[
@@ -120,7 +120,7 @@ def findOptimumUsingPSO(model, poly, scaler, bounds, findMax=True, random_guess=
 
     return points, results
 
-
+# Use polynomial model to predict data ,just to visual the reconstructed contour plot
 def reconstruct_map(model, poly, scaler, bounds, resolution=500):
  
     min_bounds = [bound[0] for bound in bounds]
@@ -148,7 +148,7 @@ def reconstruct_map(model, poly, scaler, bounds, resolution=500):
 
 
 
-
+# Not using
 class CenterMinMaxScaler(BaseEstimator, TransformerMixin):
     def __init__(self, feature_range=(0, 1)):
         self.feature_range = feature_range
@@ -164,6 +164,7 @@ class CenterMinMaxScaler(BaseEstimator, TransformerMixin):
     def transform(self, X, y=None):
         return self.pipeline.transform(X)
 
+# Using MinMaxScaler
 def generateScaler(bounds, scaler_type=1):
 
     min_bounds = [bound[0] for bound in bounds]

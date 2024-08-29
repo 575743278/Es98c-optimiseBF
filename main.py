@@ -65,7 +65,7 @@ def find_extreme_in_blast(input_data, sampleSize=100, findMax=True, degree=3, it
     generate_sample_time = 0
     while i < iteration and not converged:
         print("bounds:", bounds)
-        # get samples
+        # Generate samples of BF data
         if generate_new_data is True:
             begin_time_gennerate_samples = time.time()
             sampled_values, sampled_results,val_values,val_results = generate_samples(
@@ -73,17 +73,19 @@ def find_extreme_in_blast(input_data, sampleSize=100, findMax=True, degree=3, it
             end_time_gennerate_samples = time.time()
             generate_sample_time = end_time_gennerate_samples - begin_time_gennerate_samples
         else:
-            
+            # Generate samples of map data
             sampled_values, sampled_results, val_values, val_results = getSamples(
                 sampleSize, input_array, results, bounds, seed=seed, needValData=needValData)
             
         print("samplesize", len(sampled_values))
+        # Because the resolution of map data is fixed, search space can not be shrinked indefinitely
+        # When there is not enough samples, stop the algorithm
         low_bound_size = min(sampleSize, 1000)
         if len(sampled_values) < low_bound_size:
             print("not enough sample size ", len(sampled_values))
             break
         begin_time = time.time()
-        # train polynomial regression model
+        # Train polynomial regression model
         model, poly, scaler = predict(
             sampled_values, sampled_results, degree, bounds)
         end_time = time.time()
@@ -108,30 +110,31 @@ def find_extreme_in_blast(input_data, sampleSize=100, findMax=True, degree=3, it
         # provided by the trained model.
         extreme_points, extreme_values = findOptimum(
             model, poly, scaler, bounds, findMax, random_guess=guess_size, method=method)
-      
+        # Find the best solution from all parameter optimization experiments
         extreme_point = findExtremeInArray(
             extreme_points, extreme_values, findMax)
-
+        # Visualization
         if needPlotMap and not skip_reconstruct:
             plotMap(scrollable_frame, predicted_elevation, coordinates,
                     extreme_points, real_extreme_point, extreme_point, title=i,origin_bounds=origin_bounds)
 
         print("find_from_predict_point", extreme_point, extreme_value)
         predict_points.append(extreme_point)
-        # calculate the reduced search space size 
+        # Calculate the reduced search space size 
         new_dimensions = getNewWH(
             origin_bounds, i, precisions, shrink_factor)
-        # contract the search space
+        # Contract the search space
         bounds = shrinkBound(origin_bounds, new_dimensions,
                              extreme_point, precisions=precisions)
         
-        # convergence determination
+        # Convergence determination
         if epsilon is not None:
             converged = lastNPointsConverged(
                 epsilon, predict_points, origin_bounds, n=3)
         i = i+1
         time_array.append(end_time-begin_time+generate_sample_time)
-        
+    
+    # Rescale the predicted input parameters to original scale    
     recovered_predict_points = []
     for predict_point in predict_points:
         recovered_predict_points.append(recoverPredictPoint(predict_point,input_data))
@@ -139,17 +142,18 @@ def find_extreme_in_blast(input_data, sampleSize=100, findMax=True, degree=3, it
     if needPlotMap:
         plotMap(scrollable_frame, data, input_array,
                 recovered_predict_points, real_extreme_point,origin_bounds=origin_bounds)
+    # Calculate error
     error_array = calculateDistanceError(recovered_predict_points, real_extreme_point, input_data, origin_bounds, error_mode)
     return ExtremeResult(time_array, rmse_array, recovered_predict_points, real_extreme_point, r2=r2_array, mape_array=mape_array, adjusted_r2_array=adjusted_r2_array,error_array=error_array)
 
-
+# Find maximum on mountain dataset
 def findMap1():
     origin_data = np.loadtxt('data/taranaki_detail5120.txt')
     input_data = getElevationsMap(origin_data)
     result = find_extreme_in_blast(input_data, findMax=True,
                           sampleSize=500, degree=3, iteration=15, guess_size=10,shrink_factor=2)
     print(result)
-
+# Find minimum on valley dataset
 def findMap2():
     origin_data = np.loadtxt('data/minimum_detail.txt')
     input_data = getElevationsMap(origin_data)
@@ -157,19 +161,20 @@ def findMap2():
                           degree=28, iteration=50, guess_size=100, method='COBYLA', shrink_factor=1.1, needPlotMap=True,epsilon=0.001)
     print(result)
 
+# Find maximum on hills dataset
 def findMap3():
     origin_data = np.loadtxt('data/palouse_detail5120.txt')
     input_data = getElevationsMap(origin_data)
     find_extreme_in_blast(input_data, findMax=True, sampleSize=50000, degree=9,
                           iteration=50,  guess_size=100, method='COBYLA', shrink_factor=1.1,epsilon=0.0002,error_mode=1)
 
-
+# Find minimum on 3D BF dataset
 def findBlastMap3D():
     input_data = getBlastMap3D()
     result = find_extreme_in_blast(input_data, findMax=False, sampleSize=560, degree=3, generate_new_data=True,
                           iteration=20,  guess_size=100, method='COBYLA', shrink_factor=1.1,  needPlotMap=True,epsilon=0.003)
     print(result)
-
+# Find minimum on 2D BF dataset
 def findBlastMap2D():
     input_data = getBlastMap()
     result = find_extreme_in_blast(input_data, findMax=False, sampleSize=210, degree=3, generate_new_data=True,
@@ -204,19 +209,19 @@ def real_run():
     # The following five methods can all be run. 
     # Uncomment the desired method to execute it.
     
-    # find maximum on mountain dataset
+    # Find maximum on mountain dataset
     findMap1()
     
-    # find minimum on valley dataset
+    # Find minimum on valley dataset
     # findMap2()
     
-    # find maximum on hills dataset
+    # Find maximum on hills dataset
     # findMap3()
     
-    # find minimum on 2D BF dataset
+    # Find minimum on 2D BF dataset
     # findBlastMap2D()
     
-    # find minimum on 3D BF dataset
+    # Find minimum on 3D BF dataset
     # findBlastMap3D()
 
 

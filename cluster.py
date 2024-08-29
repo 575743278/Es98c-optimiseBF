@@ -25,7 +25,7 @@ from regression import *
 default_extreme_mode = 0
 saveResultFile = True
 
-# performs clustering
+# Performs clustering
 def divide_to_blocks(bounds, block_nums, precisions):
     num_dimensions = len(bounds)
     assert num_dimensions == len(block_nums) == len(precisions), "wrong"
@@ -39,12 +39,12 @@ def divide_to_blocks(bounds, block_nums, precisions):
         bounds_array.append(rounded_bounds)
     return bounds_array,divisions
 
-# get samples in each cluster and identifies the optimal cluster using either the extreme value mode or the average mode
+# Get samples in each cluster and identifies the optimal cluster using either the extreme value mode or the average mode
 def findExtremeBlock(input_array, data, bounds_array, sample_size, findMax=False, need_generate_data=False, fileName=None, dimesion_info=None, precisions=None,mode = default_extreme_mode,extreme_sample_num = 3):
     best_mean = None
     best_block = None
     
-    # get samples
+    # Get samples or generate samples
     if need_generate_data:
         split_points, split_values = generate_samples_all(fileName, bounds_array, sample_size, dimesion_info, precisions)
     else:
@@ -55,7 +55,7 @@ def findExtremeBlock(input_array, data, bounds_array, sample_size, findMax=False
             split_points.append(train_values)
             split_values.append(train_results)
 
-    # identifies the optimal cluster using either the extreme value mode or the average mode
+    # Identifies the optimal cluster using either the extreme value mode or the average mode
     for i, bound in enumerate(bounds_array):
   
         train_results = split_values[i]
@@ -107,12 +107,12 @@ def find_extreme_use_cluster(input_data,block_nums, sampleSize=100, findMax=True
     time_array = []
     converged = False
     while i < iteration and not converged:
-        # performs clustering
+        # Performs clustering
         bounds_array,divisions = divide_to_blocks(
             bounds, block_nums,precisions)
         print("bounds:",bounds)
         begin_time = time.time()
-        # get samples in each cluster and identifies the optimal cluster using either the extreme value mode or the average mode
+        # Get samples in each cluster and identifies the optimal cluster using either the extreme value mode or the average mode
         best_block, best_mean,real_sample_size = findExtremeBlock(
             input_array, data, bounds_array, sampleSize, findMax=findMax,need_generate_data = generate_new_data,fileName=fileName,dimesion_info=dimesion_info,precisions = precisions)
         print("real_sample_size:",real_sample_size)
@@ -120,31 +120,31 @@ def find_extreme_use_cluster(input_data,block_nums, sampleSize=100, findMax=True
             print("not enough samplesize")
             break
         time_array.append(time.time()-begin_time)
-        # returns the centroid of the optimal cluster as the predicted optimal input parameter combination
+        # Returns the centroid of the optimal cluster as the predicted optimal input parameter combination
         extreme_point = returnPointInBlock(best_block, data,precisions)
         print("find_from_predict_point", extreme_point)
         predict_points.append(extreme_point)
-        # calculate the reduced search space size 
+        # Calculate the reduced search space size 
         new_dimensions = getNewWH(
             origin_bounds, i, precisions, shrink_factor)
-        # contract the search space
+        # Contract the search space
         bounds = shrinkBound(origin_bounds, new_dimensions,
                              extreme_point, precisions=precisions)
-        # convergence determination
+        # Convergence determination
         if epsilon is not None:
             converged = lastNPointsConverged(epsilon,predict_points,origin_bounds, n=3)
             if converged:
                 print("converged",block_nums)
         i = i+1
         
-    
+    # Visualization
     if needPlotMap:
         plotMap(scrollable_frame, data, input_array,
             predict_points, real_extreme_point,origin_bounds=origin_bounds)
     error_array = calculateDistanceError(predict_points, real_extreme_point, input_data, origin_bounds, error_mode)
     return ExtremeResult(time_array,  0, predict_points, real_extreme_point,error_array=error_array)
 
-
+# Returns the centroid of the optimal cluster as the predicted optimal input parameter combination
 def returnPointInBlock(best_block_bounds, data, precisions):
     num_dimensions = len(best_block_bounds)
     mid_points = []
@@ -157,7 +157,7 @@ def returnPointInBlock(best_block_bounds, data, precisions):
 
     return mid_points
 
-
+# Find maximum on mountain dataset
 def plotMap1():
     origin_data = np.loadtxt('data/taranaki_detail5120.txt')
     input_data = getElevationsMap(origin_data)
@@ -166,6 +166,7 @@ def plotMap1():
                                     iteration=50,  generate_new_data=False,  shrink_factor=2,needPlotMap = True)   
     print(result)
     return result
+# Find minimum on valley dataset
 def plotMap2():
     origin_data = np.loadtxt('data/minimum_detail5120.txt')
     input_data = getElevationsMap(origin_data)
@@ -175,6 +176,7 @@ def plotMap2():
     print(result)
     return result
 
+# Find maximum on hills dataset
 def plotMap3():
     origin_data = np.loadtxt('data/palouse_detail5120.txt')
     input_data = getElevationsMap(origin_data)
@@ -183,12 +185,16 @@ def plotMap3():
                                     iteration=50,  generate_new_data=False,  shrink_factor=1.2,needPlotMap = True,error_mode=1,epsilon=0.0002)
     print(result)
     return result
+
+# Find minimum on 2D BF dataset
 def findBlastMap2D(): 
     block_nums = [2,2]
     input_data = getBlastMap()   
     result = find_extreme_use_cluster(input_data, block_nums,findMax=False, sampleSize=16, 
                                     iteration=30,  generate_new_data=True,  shrink_factor=2,needPlotMap= True)
     print(result)
+    
+# Find minimum on 3D BF dataset
 def findBlastMap3D():
   
     
@@ -254,19 +260,19 @@ def real_run():
     # The following five methods can all be run. 
     # Uncomment the desired method to execute it.
     
-    # find maximum on mountain dataset
+    # Find maximum on mountain dataset
     plotMap1()
     
-    # find minimum on valley dataset
+    # Find minimum on valley dataset
     # plotMap2()
     
-    # find maximum on hills dataset
+    # Find maximum on hills dataset
     # plotMap3()
     
-    # find minimum on 2D BF dataset
+    # Find minimum on 2D BF dataset
     # findBlastMap2D()
     
-    # find minimum on 3D BF dataset
+    # Find minimum on 3D BF dataset
     # findBlastMap3D()
   
 
