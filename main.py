@@ -186,6 +186,7 @@ def findUsingPairwise():
     for index , input_data in enumerate(pairwise_inputs):
         if index != 0:
             input_old = pairwise_inputs[index-1]
+            # Learn parameter from last iteration
             setOptimisedConstant(input_old,input_data,predict_points[-1])
         result = find_extreme_in_blast(input_data, findMax=False, sampleSize=210, degree=3, generate_new_data=True,
                           iteration=20,  guess_size=100, method='COBYLA', shrink_factor=1.1, needPlotMap=False,epsilon=0.003)

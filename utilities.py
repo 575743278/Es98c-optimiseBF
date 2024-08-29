@@ -961,12 +961,16 @@ def generate_pairwise_inputs_3D(isCluster = False):
     
     return pairwise_inputs
 
+# Learn parameter from last iteration
 def setOptimisedConstant(lastMapInfo, curentMapInfo, predict_points):
  
-    last_variables = lastMapInfo.dimesion_info.variables_name
-
-    
+    last_variables = lastMapInfo.dimesion_info.variables_name 
     current_constants_map = curentMapInfo.dimesion_info.constants_map
+    last_constants_map = lastMapInfo.dimesion_info.constants_map
+    
+    for const in current_constants_map:
+        if const in last_constants_map:
+            current_constants_map[const] = last_constants_map[const]
 
     for var, value in zip(last_variables, predict_points):
         if var in current_constants_map:
@@ -989,5 +993,4 @@ def getCombinedResult(curentMapInfo, predict_point):
         combined_result[var] = value
     print(combined_result)
     return combined_result
-
 

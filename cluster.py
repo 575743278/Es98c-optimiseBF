@@ -240,6 +240,7 @@ def findUsingPairwise():
     for index , input_data in enumerate(pairwise_inputs):
         if index != 0:
             input_old = pairwise_inputs[index-1]
+            # Learn parameter from last iteration
             setOptimisedConstant(input_old,input_data,predict_points[-1])
         result = find_extreme_use_cluster(input_data, block_nums,findMax=False, sampleSize=16, 
                                     iteration=20,  generate_new_data=True,  shrink_factor=2,needPlotMap= False)
